@@ -5,7 +5,7 @@ T=latex.out
 TEX=$(patsubst %,$(T)/%,$(wildcard *.tex))
 SPELLTEX=$(wildcard *.tex)
 
-all: book.pdf
+all: book.pdf book.epub
 .PHONY: all src clean
 
 $(T)/%.tex: %.tex | src
@@ -25,6 +25,18 @@ book.pdf: src book.tex $(TEX)
 	bibtex book
 	pdflatex book.tex
 	pdflatex book.tex
+
+book.epub: book.tex book.pdf $(TEX) replace_pdf_extension_with_svg.lua
+	pandoc \
+	--lua-filter replace_pdf_extension_with_svg.lua \
+	--number-sections \
+	--preserve-tabs \
+	--standalone \
+	--to epub3 \
+	--toc \
+	--webtex \
+	$(T)/book.tex \
+	--output book.epub
 
 clean:
 	rm -f book.aux book.idx book.ilg book.ind book.log\
